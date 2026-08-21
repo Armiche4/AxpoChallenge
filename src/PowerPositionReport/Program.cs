@@ -5,10 +5,13 @@ using PowerPositionReport.Configuration;
 var builder = Host.CreateApplicationBuilder(args);
 
 // --- Configuration ---
-// Reads the "AppSettings" section from appsettings.json and binds it to the AppSettings class.
-// This allows IOptions<AppSettings> to be injected into any service.
-builder.Services.Configure<AppSettings>(
-    builder.Configuration.GetSection("AppSettings"));
+// Reads the "AppSettings" section from appsettings.json (or command-line overrides,
+// e.g. --AppSettings:OutputPath=... --AppSettings:IntervalMinutes=...), binds it to
+// the AppSettings class.
+builder.Services.AddOptions<AppSettings>()
+    .Bind(builder.Configuration.GetSection("AppSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 // --- Services ---
 // Registers PowerService (the provided DLL) as the implementation for IPowerService.
