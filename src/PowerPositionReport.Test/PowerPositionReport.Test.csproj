@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,6 +16,18 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PowerPositionReport\PowerPositionReport.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Needed to build PowerTrade/PowerPeriod directly in the tests
+         (e.g. PowerPositionAggregatorTests), same as in PowerPositionReport.csproj. -->
+    <Reference Include="PowerService">
+      <HintPath>..\..\netstandard2.0\PowerService.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
