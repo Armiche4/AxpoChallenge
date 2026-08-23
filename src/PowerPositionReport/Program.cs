@@ -1,5 +1,5 @@
+using PowerPositionReport;
 using PowerPositionReport.Configuration;
-using PowerPositionReport.Scheduling;
 
 var builder = Host.CreateApplicationBuilder(args);
 

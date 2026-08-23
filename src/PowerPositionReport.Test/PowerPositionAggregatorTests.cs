@@ -46,4 +46,47 @@ public class PowerPositionAggregatorTests
             Assert.Equal(expected[i].Volume, result[i].Volume);
         }
     }
+
+    // The two clock-change days. PowerService derives its period count from the real length of
+    // the local day, so it returns 23 or 25 periods instead of 24: the report must follow.
+    [Fact]
+    public void Aggregate_SkipsTheHourThatNeverHappens_WhenTheClocksGoForward()
+    {
+        // 29 Mar 2026: the local day lasts 23 hours because 01:00 does not exist. There must be
+        // no row for it, and none invented with volume 0 either. Period 3 lands straight on 02:00.
+        var trade = TradeWithVolumeEqualToPeriodNumber(new DateTime(2026, 3, 29), 23);
+
+        var result = new PowerPositionAggregator().Aggregate(new[] { trade });
+
+        Assert.Equal(23, result.Count);
+        Assert.DoesNotContain(result, hourlyVolume => hourlyVolume.LocalHour.Hour == 1);
+        Assert.Equal(new TimeOnly(2, 0), result[2].LocalHour);//In a normal day this would be 1:00, but the clock jumped forward to 2:00.
+    }
+
+    [Fact]
+    public void Aggregate_KeepsBothDeliveryHoursApart_WhenTheClocksGoBack()
+    {
+        // 25 Oct 2026: the local day lasts 25 hours because 01:00 happens twice. Periods 3 and 4
+        // are two different delivery hours sharing that label, so they must stay two rows.
+        // Grouping by the "HH:mm" label instead of by the instant would merge them into one.
+        var trade = TradeWithVolumeEqualToPeriodNumber(new DateTime(2026, 10, 25), 25);
+
+        var result = new PowerPositionAggregator().Aggregate(new[] { trade });
+
+        Assert.Equal(25, result.Count);
+        Assert.Equal(new TimeOnly(1, 0), result[2].LocalHour);//In a normal day this would be 1:00, but the clock jumped back to 1:00 again.
+        Assert.Equal(new TimeOnly(1, 0), result[3].LocalHour);
+    }
+
+    // Volume = period number, so every row can be traced back to the period it came from.
+    private static PowerTrade TradeWithVolumeEqualToPeriodNumber(DateTime date, int numberOfPeriods)
+    {
+        var trade = PowerTrade.Create(date, numberOfPeriods);
+        for (var i = 0; i < trade.Periods.Length; i++)
+        {
+            trade.Periods[i].SetVolume(i + 1);
+        }
+
+        return trade;
+    }
 }
