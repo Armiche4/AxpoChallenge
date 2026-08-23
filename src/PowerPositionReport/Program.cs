@@ -1,7 +1,15 @@
 using PowerPositionReport;
 using PowerPositionReport.Configuration;
+using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+// --- Logging ---
+builder.Services.AddSerilog(config => config
+    .WriteTo.Console()
+    .WriteTo.File(
+        Path.Combine(AppContext.BaseDirectory, "logs", "powerpositionreport-.log"),
+        rollingInterval: RollingInterval.Day));
 
 // --- Configuration ---
 // Reads the "AppSettings" section from appsettings.json (or command-line overrides,
