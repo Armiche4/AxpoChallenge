@@ -1,6 +1,5 @@
-using Axpo;
-using PowerPositionReport;
 using PowerPositionReport.Configuration;
+using PowerPositionReport.Scheduling;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -14,9 +13,10 @@ builder.Services.AddOptions<AppSettings>()
     .ValidateOnStart();
 
 // --- Services ---
-// Registers PowerService (the provided DLL) as the implementation for IPowerService.
-// Using the interface allows us to easily replace it with a mock during testing.
-builder.Services.AddSingleton<IPowerService, PowerService>();
+// Every interface -> implementation registration lives in
+// Configuration/ServiceCollectionExtensions.cs, so this file stays a short composition root
+// instead of growing with every new service.
+builder.Services.AddPowerPositionReportServices();
 
 // --- Worker ---
 // Registers the Worker as a background service that executes automatically upon application startup.

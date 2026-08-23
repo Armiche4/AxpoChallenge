@@ -18,8 +18,6 @@ namespace PowerPositionReport.Aggregation;
 /// </summary>
 public sealed class PowerPositionAggregator : IPowerPositionAggregator
 {
-    private static readonly TimeZoneInfo LondonTimeZone = ResolveLondonTimeZone();
-
     public IReadOnlyList<HourlyVolume> Aggregate(IEnumerable<PowerTrade> trades)
     {
         ArgumentNullException.ThrowIfNull(trades);
@@ -34,7 +32,7 @@ public sealed class PowerPositionAggregator : IPowerPositionAggregator
             foreach (var period in trade.Periods)
             {
                 var periodStartUtc = dayStartUtc.AddHours(period.Period - 1);
-                var localHour = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(periodStartUtc, LondonTimeZone));
+                var localHour = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(periodStartUtc, LondonTimeZone.Instance));
 
                 if (volumeByLocalHour.TryGetValue(localHour, out var currentVolume))
                 {
@@ -62,21 +60,6 @@ public sealed class PowerPositionAggregator : IPowerPositionAggregator
         var previousDay = tradeDate.Date.AddDays(-1);
         var localDayStart = new DateTime(previousDay.Year, previousDay.Month, previousDay.Day, 23, 0, 0);
 
-        return TimeZoneInfo.ConvertTimeToUtc(localDayStart, LondonTimeZone);
-    }
-
-    private static TimeZoneInfo ResolveLondonTimeZone()
-    {
-        // "Europe/London" is the IANA identifier (works on Linux/macOS and on modern Windows
-        // with ICU). On older Windows versions the same time zone is identified as
-        // "GMT Standard Time". We try both so the code doesn't depend on the operating system.
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-        }
+        return TimeZoneInfo.ConvertTimeToUtc(localDayStart, LondonTimeZone.Instance);
     }
 }
