@@ -21,8 +21,15 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddPowerPositionReportServices(this IServiceCollection services)
     {
-        // PowerService (the provided DLL) is the implementation for IPowerService.
-        services.AddSingleton<IPowerService, PowerService>();
+        // Every consumer of IPowerService gets the retrying decorator, never the raw DLL client.
+        // It is built here by hand because the container cannot resolve a decorator on its own:
+        // RetryingPowerService asks for the very interface it would be registered under.
+        services.AddSingleton<IPowerService>(serviceProvider => new RetryingPowerService(
+            new PowerService(),
+            serviceProvider.GetRequiredService<ILogger<RetryingPowerService>>(),
+            retryDelay: TimeSpan.FromSeconds(2),
+            retryBudget: TimeSpan.FromSeconds(30)));
+
         services.AddSingleton<IPowerPositionAggregator, PowerPositionAggregator>();
         services.AddSingleton<ICsvReportWriter, CsvReportWriter>();
         services.AddSingleton<IPowerPositionReportService, PowerPositionReportService>();

@@ -22,8 +22,7 @@ public class PowerPositionReportService(
 
     public async Task RunExtractionAsync(CancellationToken cancellationToken)
     {
-        // "Now", in Europe/London local time - not server time, which in production is likely
-        // UTC. See SOLUTION.md for why "tomorrow" (day-ahead) is computed this way.
+
         var londonNow = TimeZoneInfo.ConvertTime(DateTimeOffset.Now, LondonTimeZone.Instance);
         var deliveryDate = londonNow.Date.AddDays(1);
 
@@ -35,9 +34,7 @@ public class PowerPositionReportService(
             londonNow.DateTime,
             _settings.OutputPath);
 
-        // Day-ahead position: PowerService.GetTradesAsync(date) returns the block of periods
-        // [23:00 on date-1, 23:00 on date), so passing tomorrow's date gives the position for
-        // the next full trading day, per the challenge's "day ahead power position" wording.
+
         var trades = await powerService.GetTradesAsync(deliveryDate);
 
         var hourlyVolumes = aggregator.Aggregate(trades);
@@ -48,7 +45,7 @@ public class PowerPositionReportService(
             hourlyVolumes.Count,
             hourlyVolumes.Sum(hourlyVolume => hourlyVolume.Volume));
 
-        // The CSV filename records the local time of extract (i.e. now, not the delivery date).
+        // The CSV filename records the local time of extract.
         var filePath = csvReportWriter.Write(hourlyVolumes, _settings.OutputPath, londonNow.DateTime);
 
         logger.LogInformation(
