@@ -22,8 +22,6 @@ builder.Services.AddOptions<AppSettings>()
 
 // --- Services ---
 // Every interface -> implementation registration lives in
-// Configuration/ServiceCollectionExtensions.cs, so this file stays a short composition root
-// instead of growing with every new service.
 builder.Services.AddPowerPositionReportServices();
 
 // --- Worker ---

@@ -3,11 +3,7 @@ using Axpo;
 namespace PowerPositionReport.Aggregation;
 
 /// <summary>
-/// Implementation of <see cref="IPowerPositionAggregator"/>.
-///
-/// Key idea: a period is one REAL hour, not one "clock hour". Period 1 starts at 23:00 local time
-/// the previous day, so a period's real instant is (day start in UTC) + N - 1 hours, and its label
-/// is that instant converted to Europe/London.
+/// Period 1 starts at 23:00 local time.
 ///
 /// Periods are grouped by that instant, NOT by the "HH:mm" label. On the day the clocks go back the
 /// label 01:00 covers two different delivery hours; grouping by label would silently merge them into

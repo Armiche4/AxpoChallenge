@@ -5,14 +5,9 @@ namespace PowerPositionReport.Extraction;
 
 /// <summary>
 /// Retries the trading system when it fails, so one transient error does not cost a whole
-/// scheduled extract (requirement 7). Being a decorator (it implements the interface it wraps)
-/// is what let resilience be added without a line changing in the DLL or in
-/// <see cref="PowerPositionReportService"/>.
+/// scheduled extract.
 ///
-/// The budget is a deadline, not a number of attempts, because we do not know how often the
-/// trading system fails - but we do know how long we can afford to keep trying. It has to stay
-/// well inside the scheduling interval: the Worker runs extractions one after another and is
-/// itself the outer retry, so anything longer than a hiccup should wait for the next run.
+/// The budget is a deadline, not a number of attempts.
 /// </summary>
 public class RetryingPowerService(
     IPowerService powerService,

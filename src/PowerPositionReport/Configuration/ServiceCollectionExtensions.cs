@@ -13,16 +13,11 @@ namespace PowerPositionReport.Configuration;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers each interface against its single implementation (dependency inversion
-    /// principle): every class in the app depends only on the interface, never on how it is
-    /// wired up here, and can be swapped for a test double without touching the class itself.
-    /// All singletons: none of them holds mutable state, so one instance is reused by every
-    /// extraction.
+    /// Registers each interface against.
     /// </summary>
     public static IServiceCollection AddPowerPositionReportServices(this IServiceCollection services)
     {
         // Every consumer of IPowerService gets the retrying decorator, never the raw DLL client.
-        // It is built here by hand because the container cannot resolve a decorator on its own:
         // RetryingPowerService asks for the very interface it would be registered under.
         services.AddSingleton<IPowerService>(serviceProvider => new RetryingPowerService(
             new PowerService(),

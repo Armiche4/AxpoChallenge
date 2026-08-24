@@ -1,16 +1,11 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using PowerPositionReport;
 using PowerPositionReport.Configuration;
 using PowerPositionReport.Extraction;
 
 namespace PowerPositionReport.Test;
 
-/// <summary>
-/// The orchestrator is replaced with a fake, so these tests only cover what the Worker itself
-/// decides: when to run an extraction, and what to do when one fails.
-/// SOLUTION.md explains what is deliberately left out (the next timer tick).
-/// </summary>
+
 public class WorkerTests
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
