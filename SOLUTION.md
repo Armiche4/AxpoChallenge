@@ -165,10 +165,3 @@ El criterio ha sido **pocos tests, cada uno fijando una decisión de diseño**, 
 | `WorkerTests` | El scheduler, en 2 tests: que ejecuta una extracción al arrancar (requisito 8) y que **sigue vivo cuando una extracción lanza excepción** (requisito 7). |
 | `ServiceRegistrationTests` | *Smoke test* de DI: monta el contenedor igual que `Program.cs` con `ValidateOnBuild` y resuelve todo. Detecta en el build un registro olvidado en `ServiceCollectionExtensions`, que si no solo se manifestaría al arrancar la aplicación. |
 
-### Qué no cubren, y por qué
-
-Probar que **el siguiente tick programado sí se dispara** tras un fallo obligaría a esperar un tick real del `PeriodicTimer` (un minuto con el intervalo mínimo configurable), demasiado lento para un test unitario. Lo que sí se prueba es justo la condición que lo rompería: que una extracción fallida no deshace `ExecuteAsync` ni, con él, el `PeriodicTimer`.
-
-Lo mismo pasa con la fecha day-ahead: al depender de `DateTimeOffset.Now`, el test calcula "mañana" de la misma forma que el código de producción, y solo fallaría si el reloj cruzase la medianoche justo entre esas dos líneas.
-
-La forma canónica de hacer ambas cosas deterministas sería inyectar `TimeProvider` (tipo del BCL desde .NET 8) en `Worker` y en el orquestador, y usar `FakeTimeProvider` (paquete `Microsoft.Extensions.TimeProvider.Testing`) en los tests para fijar el reloj y adelantar el tiempo a voluntad. Se ha dejado fuera a propósito para no añadir una abstracción más al código de producción a cambio de cobertura en un caso acotado; es una decisión reversible y un buen punto de conversación sobre el diseño.
